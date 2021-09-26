@@ -1,0 +1,42 @@
+<html>
+	<head>
+		<title>Vertretungsplaner</title>
+	</head>
+	<body>
+		<h1>Vertretungsplaner</h1>
+	
+		<script>
+			generate("20210913",14)
+			function generate(date,cl){
+				var xhr = new XMLHttpRequest();
+  				xhr.open("GET", "Daten/PlanKl"+date+".xml", false);
+				xhr.onreadystatechange = function () {
+  		  			if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+   	   			const parser = new DOMParser();
+						var xml = parser.parseFromString(xhr.response,"application/xml");
+						createTable(xml.querySelectorAll('Pl')[cl].querySelectorAll('Std'))
+					}
+				}
+				xhr.send();
+			}
+			function createTable(data){
+    			var body = document.querySelector('body');
+    			tbl  = document.createElement('table');
+    			tbl.style.border = '1px solid black';
+    			for(var i = 0; i < data.length; i++){
+        			var tr = tbl.insertRow();
+        			createRow(tr,data[i].childNodes)
+    			}
+    			body.appendChild(tbl);
+			}
+
+			function createRow(tr,data){
+				for(var j = 0; j < 5; j++){
+					var td = tr.insertCell();
+					td.appendChild(document.createTextNode(data[j].innerHTML));
+					td.style.border = '1px solid black';
+				}
+			}
+		</script>
+	</body>
+</html>
