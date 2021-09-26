@@ -3,6 +3,7 @@ function generate(date, cl) {
     if ("withCredentials" in request) {
         // Firefox 3.5 and Safari 4
         request.open('GET', "https://www.stundenplan24.de/10196133/mobil/mobdaten/Klassen.xml?_=1632390645641", true);
+        request.setRequestHeader("Authorization", "Basic c2NodWVsZXI6Uzc0dDkxNQ==");
         request.onreadystatechange = function () {
             console.log(request)
             if (request.readyState === request.DONE && request.status === 200) {
