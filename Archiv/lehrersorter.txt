@@ -1,0 +1,69 @@
+var completionText = loadXML()
+completion(completionText);
+
+function loadXML(){
+  var returnText = "error"
+  var xhr = new XMLHttpRequest();
+
+  xhr.open("GET", "mobdaten/Klassen.xml", false);
+
+  xhr.onreadystatechange = function () {
+    if (xhr.readyState === xhr.DONE && xhr.status === 200) {
+      const parser = new DOMParser();
+      
+      var xml = parser.parseFromString(xhr.response,"application/xml");
+
+		returnText = filterXML(xml)
+    }
+  }
+	xhr.send();
+	return returnText;
+}
+
+function filterXML(xml){
+	var classes = xml.querySelectorAll("Kl");
+	var plans = document.implementation.createDocument(null, "Pl");
+	for(var c of classes){
+		var plan = prepClassPlans(c)
+		for (var i = 0; i < plan.length; i++){			plans.documentElement.append(plan[i]);
+	  }
+	}
+	var sorted = sortClassPlans(plans, "Le")
+
+	sorted.documentElement.append(xml.querySelector("Kopf"))
+	sorted.documentElement.append(xml.querySelector("ZusatzInfo"))
+	return sorted.documentElement.outerHTML
+}
+
+function prepClassPlans(c){
+	var lessons = c.querySelectorAll("Std")
+	var className = c.querySelector("Kurz");
+	for (var i = 0; i < lessons.length; i++){
+		var copy = className.cloneNode(true);
+		//copy.nodeName = "Kla"
+		lessons[i].appendChild(copy);
+	}
+	
+	return lessons
+}
+
+function sortClassPlans(plans, argument){
+  var sortedList = document.implementation.createDocument(null, "VpMobilSorted");
+	var stds = plans.querySelectorAll("Std")
+  for (st of stds){
+		var sortName = st.querySelector(argument).innerHTML
+    	try {var sortNode = sortedList.querySelector(argument+'[LeKurz="'+sortName+'"]')}
+		catch {}
+   	
+		if(sortNode){
+			sortNode.appendChild(st)
+		}
+   	else{
+   		sortNode = sortedList.createElement(argument)
+			sortNode.setAttribute("LeKurz",sortName)
+			sortedList.documentElement.append(sortNode)
+   		sortNode.appendChild(st)
+   	}
+	}
+	return sortedList
+}
